@@ -150,7 +150,7 @@ export default function Playground({
 
     const videoContent = (
       <VideoTrack
-        trackRef={agentVideoTrack}
+        trackRef={agentVideoTrack || localVideoTrack}
         className={`absolute top-1/2 -translate-y-1/2 ${videoFitClassName} object-position-center w-full h-full`}
       />
     );
@@ -158,7 +158,7 @@ export default function Playground({
     let content = null;
     if (roomState === ConnectionState.Disconnected) {
       content = disconnectedContent;
-    } else if (agentVideoTrack) {
+    } else if (agentVideoTrack || localVideoTrack) {
       content = videoContent;
     } else {
       content = loadingContent;
@@ -169,7 +169,8 @@ export default function Playground({
         {content}
       </div>
     );
-  }, [agentVideoTrack, config, roomState]);
+  }, [agentVideoTrack, localVideoTrack, config, roomState]);
+
 
   const audioTileContent = useMemo(() => {
     const disconnectedContent = (

@@ -15,13 +15,17 @@ import {
 } from "livekit-client";
 import { useEffect, useState } from "react";
 
+interface TranscriptionTileProps {
+  agentAudioTrack: TrackReferenceOrPlaceholder;
+  accentColor: string;
+  onMessagesUpdate?: (messages: ChatMessageType[]) => void; // 添加 onMessagesUpdate 属性
+}
+
 export function TranscriptionTile({
   agentAudioTrack,
   accentColor,
-}: {
-  agentAudioTrack: TrackReferenceOrPlaceholder;
-  accentColor: string;
-}) {
+  onMessagesUpdate,
+}:TranscriptionTileProps) {
   const agentMessages = useTrackTranscription(agentAudioTrack);
   const localParticipant = useLocalParticipant();
   const localMessages = useTrackTranscription({
@@ -68,11 +72,11 @@ export function TranscriptionTile({
       let name = msg.from?.name;
       if (!name) {
         if (isAgent) {
-          name = "Agent";
+          name = "Agent:";
         } else if (isSelf) {
-          name = "You";
+          name = "You:";
         } else {
-          name = "Unknown";
+          name = "Unknown:";
         }
       }
       allMessages.push({
@@ -84,6 +88,11 @@ export function TranscriptionTile({
     }
     allMessages.sort((a, b) => a.timestamp - b.timestamp);
     setMessages(allMessages);
+    
+    // 调用 onMessagesUpdate 回调函数
+    if (onMessagesUpdate) {
+      onMessagesUpdate(allMessages);
+    }
   }, [
     transcripts,
     chatMessages,
@@ -91,8 +100,9 @@ export function TranscriptionTile({
     agentAudioTrack.participant,
     agentMessages.segments,
     localMessages.segments,
+    onMessagesUpdate, // 添加 onMessagesUpdate 到依赖数组
   ]);
-
+  
   return (
     <ChatTile messages={messages} accentColor={accentColor} onSend={sendChat} />
   );
